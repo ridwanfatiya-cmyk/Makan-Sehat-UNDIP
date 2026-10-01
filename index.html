@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FoodTruck Undip - War Meal Pass System</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            purple: '#4F46E5',
+                            darkPurple: '#3730A3',
+                            navy: '#0B132B',
+                            darkNavy: '#1C2541',
+                            accent: '#10B981',
+                            gold: '#F59E0B',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F1F5F9;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .pulse-ring {
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+        @keyframes pulse-green {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="flex justify-center items-center min-h-screen p-0 sm:p-4 md:p-6 bg-slate-200">
+
+    <!-- Mobile/App Frame Viewport -->
+    <div class="w-full max-w-md bg-slate-50 min-h-screen sm:min-h-[880px] sm:max-h-[920px] sm:rounded-[40px] shadow-2xl overflow-hidden relative border border-slate-200/80 flex flex-col">
+
+        <!-- HEADER SECTION -->
+        <header class="bg-white px-5 pt-5 pb-4 sticky top-0 z-30 border-b border-slate-100 flex items-center justify-between shadow-sm">
+            <div class="flex items-center space-x-3">
+                <div class="relative">
+                    <div class="w-11 h-11 rounded-full bg-indigo-900 text-white flex items-center justify-center font-bold text-lg border-2 border-indigo-700 shadow-md">
+                        AR
+                    </div>
+                    <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-white rounded-full"></span>
+                </div>
+                <div>
+                    <h1 class="text-base font-extrabold text-slate-800 leading-tight">Hello, Ahmad Rifai!</h1>
+                    <p class="text-xs font-mono text-slate-500">220101928 <span class="text-slate-300">•</span> Teknik Informatika</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button onclick="toggleNotificationModal()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 transition flex items-center justify-center text-slate-600 relative">
+                    <i class="fa-solid fa-bell text-sm"></i>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full animate-ping"></span>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full"></span>
+                </button>
+                <button onclick="switchTab('profile')" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 transition flex items-center justify-center text-slate-600">
+                    <i class="fa-solid fa-magnifying-glass text-sm"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- MAIN SCROLLABLE CONTENT AREA -->
+        <main id="mainContent" class="flex-1 overflow-y-auto custom-scrollbar pb-24">
+            
+            <!-- VIEW 1: HOME PAGE -->
+            <div id="tabHome" class="p-4 space-y-4">
+
+                <!-- WAR MEAL PASS COUNTDOWN HERO BANNER -->
+                <div class="bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 rounded-3xl p-5 text-white shadow-xl relative overflow-hidden">
+                    <!-- Background Decorative Circles -->
+                    <div class="absolute -right-8 -bottom-8 w-36 h-36 bg-white/10 rounded-full blur-xl pointer-events-none"></div>
+                    <div class="absolute -left-10 -top-10 w-32 h-32 bg-purple-400/20 rounded-full blur-lg pointer-events-none"></div>
+
+                    <div class="flex justify-between items-start mb-3">
+                        <span class="bg-indigo-900/80 text-amber-300 font-semibold text-[10px] tracking-wider px-3 py-1 rounded-full uppercase flex items-center gap-1 border border-amber-400/30">
+                            <i class="fa-solid fa-bolt text-amber-400 text-xs"></i> WAR MEAL PASS TODAY
+                        </span>
+
+                        <div class="relative flex items-center justify-center">
+                            <svg class="w-12 h-12 transform -rotate-90">
+                                <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="4" class="text-indigo-900/50" fill="transparent"/>
+                                <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="4" stroke-dasharray="125.6" stroke-dashoffset="30" class="text-amber-400 transition-all duration-500" fill="transparent"/>
+                            </svg>
+                            <span class="absolute text-[9px] font-black tracking-widest text-amber-300">WAR</span>
+                        </div>
+                    </div>
+
+                    <h2 class="text-2xl font-black tracking-tight mb-0.5">Counting Down</h2>
+                    <p class="text-xs text-indigo-200 mb-4 font-medium">Registration opens at 10:00 AM</p>
+
+                    <!-- Timer Boxes -->
+                    <div class="bg-indigo-950/60 backdrop-blur-md rounded-2xl p-3 grid grid-cols-5 gap-1 text-center items-center mb-4 border border-indigo-400/20">
+                        <div>
+                            <span id="hours" class="block font-mono text-xl font-extrabold text-amber-400">00</span>
+                            <span class="text-[9px] text-indigo-300 uppercase tracking-wider font-semibold">Hours</span>
+                        </div>
+                        <span class="text-indigo-400 font-bold text-lg">:</span>
+                        <div>
+                            <span id="minutes" class="block font-mono text-xl font-extrabold text-white">13</span>
+                            <span class="text-[9px] text-indigo-300 uppercase tracking-wider font-semibold">Mins</span>
+                        </div>
+                        <span class="text-indigo-400 font-bold text-lg">:</span>
+                        <div>
+                            <span id="seconds" class="block font-mono text-xl font-extrabold text-white">53</span>
+                            <span class="text-[9px] text-indigo-300 uppercase tracking-wider font-semibold">Secs</span>
+                        </div>
+                    </div>
+
+                    <!-- Smart Waiting Room CTA Button -->
+                    <button onclick="openSmartWaitingRoom()" class="w-full bg-white hover:bg-slate-100 text-indigo-900 font-extrabold text-xs py-3.5 px-4 rounded-xl shadow-lg transition active:scale-[0.98] flex items-center justify-center space-x-2 group">
+                        <span class="tracking-wide uppercase">[ MASUK SMART WAITING ROOM ]</span>
+                        <i class="fa-solid fa-arrow-right text-indigo-600 group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+
+                <!-- MENU HARI INI CARD -->
+                <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200/80 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-lg">🍱</span>
+                            <h3 class="font-extrabold text-slate-800 text-base">Menu Hari Ini</h3>
+                            <span class="bg-amber-100 text-amber-800 font-semibold text-[10px] px-2.5 py-0.5 rounded-full border border-amber-200">
+                                20 Sept 2026
+                            </span>
+                        </div>
+                        <span class="bg-emerald-50 text-emerald-700 font-bold text-[11px] px-2.5 py-1 rounded-full border border-emerald-200/60">
+                            Gratis Mahasiswa
+                        </span>
+                    </div>
+
+                    <!-- Food Image Banner -->
+                    <div class="relative rounded-2xl overflow-hidden shadow-inner aspect-[16/9] group">
+                        <img src="https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&w=800&q=80" alt="Spesial FoodTruck Undip" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                        <div class="absolute bottom-3 left-3 bg-black/60 backdrop-blur-md text-white text-[11px] font-bold px-3 py-1 rounded-lg border border-white/20">
+                            Spesial FoodTruck Undip
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-xs font-bold text-slate-700 mb-2">Paket Makan Siang Sehat:</p>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex items-center space-x-2.5">
+                                <span class="w-7 h-7 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center text-sm">🍚</span>
+                                <span class="text-xs font-semibold text-slate-700">Nasi Pulen</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex items-center space-x-2.5">
+                                <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-600 flex items-center justify-center text-sm">🍗</span>
+                                <span class="text-xs font-semibold text-slate-700">Ayam Crispy</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex items-center space-x-2.5">
+                                <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm">🥗</span>
+                                <span class="text-xs font-semibold text-slate-700">Sayur Tumis</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-100 rounded-xl p-2.5 flex items-center space-x-2.5">
+                                <span class="w-7 h-7 rounded-lg bg-red-100 text-red-600 flex items-center justify-center text-sm">🍎</span>
+                                <span class="text-xs font-semibold text-slate-700">Buah Segar</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STATS & PICKUP INFO GRID -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                        <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center mb-2 text-sm">
+                            <i class="fa-solid fa-box-archive"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">TOTAL KUOTA</span>
+                            <span class="text-2xl font-black text-slate-800 tracking-tight leading-none">1,800</span>
+                            <span class="text-[11px] text-slate-500 font-medium block mt-0.5">Porsi Hari Ini</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-sm flex flex-col justify-between">
+                        <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-2 text-sm">
+                            <i class="fa-solid fa-location-dot"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">PICKUP POINTS</span>
+                            <span class="text-2xl font-black text-slate-800 tracking-tight leading-none">3 Titik</span>
+                            <span class="text-[11px] text-slate-500 font-medium block mt-0.5">Fakultas A, B, & C</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SYSTEM GUARANTEE BANNER -->
+                <div class="bg-emerald-50 border border-emerald-200/80 rounded-2xl p-3.5 flex items-start space-x-3">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex-shrink-0 flex items-center justify-center shadow-sm">
+                        <i class="fa-solid fa-shield-halved text-sm"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-emerald-900">Sistem Bebas Lag & Bebas Captcha</h4>
+                        <p class="text-[11px] text-emerald-700 leading-snug mt-0.5">
+                            Terpisah dari server perkuliahan. Antrean dicatat otomatis dalam orde milidetik tanpa perlu refresh manual.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- NEW FITUR: RATING & ULASAN FOOD TRUCK HARI INI -->
+                <div id="reviewSection" class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200/80 space-y-4">
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xl">⭐</span>
+                            <div>
+                                <h3 class="font-extrabold text-slate-800 text-base leading-tight">Ulasan Food Truck</h3>
+                                <p class="text-[11px] text-slate-500">Berikan kritik & saran untuk menu hari ini</p>
+                            </div>
+                        </div>
+                        <span class="bg-indigo-50 text-indigo-700 font-bold text-[10px] px-2.5 py-1 rounded-full border border-indigo-100">
+                            Feed Mahasiswa
+                        </span>
+                    </div>
+
+                    <!-- STAR RATING FORM CONTAINER -->
+                    <form id="reviewForm" onsubmit="submitReview(event)" class="space-y-3 bg-slate-50/80 rounded-2xl p-3.5 border border-slate-200/60">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Beri Bintang Kepuasan:</label>
+                            <div class="flex items-center space-x-1.5" id="starRatingContainer">
+                                <button type="button" onclick="setRating(1)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition transform hover:scale-110"><i class="fa-solid fa-star"></i></button>
+                                <button type="button" onclick="setRating(2)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition transform hover:scale-110"><i class="fa-solid fa-star"></i></button>
+                                <button type="button" onclick="setRating(3)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition transform hover:scale-110"><i class="fa-solid fa-star"></i></button>
+                                <button type="button" onclick="setRating(4)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition transform hover:scale-110"><i class="fa-solid fa-star"></i></button>
+                                <button type="button" onclick="setRating(5)" class="star-btn text-2xl text-slate-300 hover:text-amber-400 transition transform hover:scale-110"><i class="fa-solid fa-star"></i></button>
+                                <span id="ratingLabel" class="text-xs font-extrabold text-amber-600 ml-2">Pilih rating</span>
+                            </div>
+                        </div>
+
+                        <!-- Tag Kategori -->
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Kategori Ulasan:</label>
+                            <div class="flex flex-wrap gap-1.5">
+                                <button type="button" onclick="toggleTag(this)" class="tag-btn text-[10px] font-bold px-2.5 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:border-indigo-400 transition">🍱 Rasa Makanan</button>
+                                <button type="button" onclick="toggleTag(this)" class="tag-btn text-[10px] font-bold px-2.5 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:border-indigo-400 transition">⚡ Pelayanan Cepat</button>
+                                <button type="button" onclick="toggleTag(this)" class="tag-btn text-[10px] font-bold px-2.5 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:border-indigo-400 transition">🧼 Kebersihan</button>
+                                <button type="button" onclick="toggleTag(this)" class="tag-btn text-[10px] font-bold px-2.5 py-1 rounded-full bg-white text-slate-600 border border-slate-200 hover:border-indigo-400 transition">🍗 Porsi Pas</button>
+                            </div>
+                        </div>
+
+                        <!-- Input Review Message -->
+                        <div>
+                            <textarea id="reviewComment" rows="2" placeholder="Tuliskan ulasan, kritik, atau saran konstruktif untuk FoodTruck Undip hari ini..." required class="w-full text-xs rounded-xl border border-slate-300 p-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white transition"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs py-2.5 px-4 rounded-xl shadow transition flex items-center justify-center space-x-1.5">
+                            <i class="fa-solid fa-paper-plane text-xs"></i>
+                            <span>Kirim Ulasan & Rating</span>
+                        </button>
+                    </form>
+
+                    <!-- COMMUNITY REVIEWS LIST FEED -->
+                    <div class="space-y-2.5 pt-1" id="reviewsList">
+                        <div class="text-[11px] font-bold text-slate-500 uppercase tracking-wider flex items-center justify-between">
+                            <span>Ulasan Mahasiswa Terbaru</span>
+                            <span class="text-indigo-600 font-semibold cursor-pointer">Lihat Semua (28)</span>
+                        </div>
+
+                        <!-- Review Item 1 -->
+                        <div class="bg-slate-50/90 rounded-2xl p-3 border border-slate-200/60 space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-6 h-6 rounded-full bg-emerald-700 text-white font-bold text-[10px] flex items-center justify-center">
+                                        DN
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-bold text-slate-800">Dian N.</span>
+                                        <span class="text-[10px] text-slate-400 font-mono ml-1">FSM • 10:42 WIB</span>
+                                    </div>
+                                </div>
+                                <div class="flex text-amber-400 text-[11px]">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-600 leading-snug">
+                                Ayam crispy-nya renyah banget dan bumbunya meresap! Pengambilan di Point A rapi banget tanpa antrean mengular. Mantap!
+                            </p>
+                            <div class="flex items-center space-x-2 pt-0.5">
+                                <span class="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-2 py-0.5 rounded-md">🍱 Rasa Makanan</span>
+                                <span class="bg-indigo-100 text-indigo-800 text-[9px] font-bold px-2 py-0.5 rounded-md">⚡ Pelayanan Cepat</span>
+                            </div>
+                        </div>
+
+                        <!-- Review Item 2 -->
+                        <div class="bg-slate-50/90 rounded-2xl p-3 border border-slate-200/60 space-y-1.5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-6 h-6 rounded-full bg-amber-700 text-white font-bold text-[10px] flex items-center justify-center">
+                                        RP
+                                    </div>
+                                    <div>
+                                        <span class="text-xs font-bold text-slate-800">Rizky P.</span>
+                                        <span class="text-[10px] text-slate-400 font-mono ml-1">FT • 10:38 WIB</span>
+                                    </div>
+                                </div>
+                                <div class="flex text-amber-400 text-[11px]">
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-solid fa-star"></i>
+                                    <i class="fa-regular fa-star text-slate-300"></i>
+                                </div>
+                            </div>
+                            <p class="text-xs text-slate-600 leading-snug">
+                                Porsi pas dan mengenyangkan. Saran sedikit untuk tim foodtruck: tambahkan sambal ekstra di tiap booth ya!
+                            </p>
+                            <div class="flex items-center space-x-2 pt-0.5">
+                                <span class="bg-amber-100 text-amber-800 text-[9px] font-bold px-2 py-0.5 rounded-md">🍗 Porsi Pas</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- VIEW 2: HISTORY TAB -->
+            <div id="tabHistory" class="p-4 space-y-4 hidden">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-lg font-black text-slate-800">Riwayat Kupon & Aktivitas</h2>
+                    <span class="text-xs text-slate-500 font-medium">3 Total Transaksi</span>
+                </div>
+
+                <div class="space-y-3">
+                    <!-- History Card Active/Success -->
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <span class="text-xs font-mono font-bold text-indigo-600">PASS #0142</span>
+                            <span class="bg-emerald-100 text-emerald-800 font-bold text-[10px] px-2.5 py-0.5 rounded-full">Aktif Hari Ini</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+                                🎫
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-slate-800">Kupon Makan Siang Gratis</h4>
+                                <p class="text-xs text-slate-500">Pickup: Location A (Gedung Fakultas A)</p>
+                                <p class="text-[11px] font-mono text-slate-400 mt-0.5">Waktu: 12:00 - 13:00 WIB</p>
+                            </div>
+                        </div>
+                        <button onclick="showCouponModal()" class="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold text-xs py-2 rounded-xl transition flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-qrcode"></i>
+                            <span>Tampilkan QR Code Kupon</span>
+                        </button>
+                    </div>
+
+                    <!-- Past History 1 -->
+                    <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-2 opacity-85">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                            <span class="text-xs font-mono font-bold text-slate-500">PASS #0891</span>
+                            <span class="bg-slate-100 text-slate-600 font-bold text-[10px] px-2.5 py-0.5 rounded-full">18 Sept 2026 • Selesai</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center text-lg">
+                                ✅
+                            </div>
+                            <div>
+                                <h4 class="text-xs font-bold text-slate-800">Kupon Makan Siang Gratis</h4>
+                                <p class="text-[11px] text-slate-500">Pickup: Location B (Gedung Fakultas B)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: PROFILE TAB -->
+            <div id="tabProfile" class="p-4 space-y-4 hidden">
+                <div class="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm text-center space-y-3">
+                    <div class="w-20 h-20 rounded-full bg-indigo-900 text-white font-extrabold text-2xl flex items-center justify-center mx-auto border-4 border-indigo-100 shadow">
+                        AR
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-black text-slate-800">Ahmad Rifai</h2>
+                        <p class="text-xs font-mono text-slate-500">220101928</p>
+                        <p class="text-xs text-indigo-600 font-semibold mt-0.5">Departemen Teknik Informatika - UNDIP</p>
+                    </div>
+                    <div class="pt-2 flex justify-center gap-2">
+                        <span class="bg-emerald-50 text-emerald-700 text-[11px] font-bold px-3 py-1 rounded-full border border-emerald-200">
+                            Status: Mahasiswa Aktif
+                        </span>
+                        <span class="bg-amber-50 text-amber-700 text-[11px] font-bold px-3 py-1 rounded-full border border-amber-200">
+                            Kuota War: 1x / Hari
+                        </span>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl p-4 border border-slate-200 shadow-sm space-y-2">
+                    <h3 class="text-xs font-extrabold text-slate-400 uppercase tracking-wider mb-2">Pengaturan Akun</h3>
+                    <div class="divide-y divide-slate-100">
+                        <div class="py-2.5 flex items-center justify-between text-xs font-semibold text-slate-700 cursor-pointer hover:text-indigo-600">
+                            <span class="flex items-center space-x-2"><i class="fa-solid fa-user-gear text-slate-400"></i><span>Edit Profil & Data Diri</span></span>
+                            <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
+                        </div>
+                        <div class="py-2.5 flex items-center justify-between text-xs font-semibold text-slate-700 cursor-pointer hover:text-indigo-600">
+                            <span class="flex items-center space-x-2"><i class="fa-solid fa-shield text-slate-400"></i><span>Keamanan SSO Single Sign-On</span></span>
+                            <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
+                        </div>
+                        <div class="py-2.5 flex items-center justify-between text-xs font-semibold text-slate-700 cursor-pointer hover:text-indigo-600">
+                            <span class="flex items-center space-x-2"><i class="fa-solid fa-circle-question text-slate-400"></i><span>Bantuan & FAQ War Pass</span></span>
+                            <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- FLOATING BOTTOM NAVIGATION BAR -->
+        <nav class="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200 shadow-xl p-2 z-30 flex items-center justify-around">
+            <button onclick="switchTab('home')" id="navHome" class="flex flex-col items-center justify-center w-1/3 py-1 text-indigo-600 font-bold transition">
+                <i class="fa-solid fa-house text-lg mb-0.5"></i>
+                <span class="text-[10px]">Home</span>
+            </button>
+            <button onclick="switchTab('history')" id="navHistory" class="flex flex-col items-center justify-center w-1/3 py-1 text-slate-400 hover:text-indigo-600 font-bold transition">
+                <i class="fa-solid fa-clock-rotate-left text-lg mb-0.5"></i>
+                <span class="text-[10px]">History</span>
+            </button>
+            <button onclick="switchTab('profile')" id="navProfile" class="flex flex-col items-center justify-center w-1/3 py-1 text-slate-400 hover:text-indigo-600 font-bold transition">
+                <i class="fa-solid fa-user text-lg mb-0.5"></i>
+                <span class="text-[10px]">Profile</span>
+            </button>
+        </nav>
+
+        <!-- ========================================================================= -->
+        <!-- SMART WAITING ROOM OVERLAY (DARK MODE FULLSCREEN SIMULATOR) -->
+        <!-- ========================================================================= -->
+        <div id="smartWaitingRoomModal" class="absolute inset-0 bg-[#0B132B] text-white z-50 overflow-y-auto custom-scrollbar flex flex-col hidden transition-all duration-300">
+            
+            <!-- Waiting Room Header -->
+            <div class="p-4 flex items-center justify-between border-b border-slate-800">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="bg-slate-800/80 text-amber-300 font-mono text-[10px] px-3 py-1 rounded-full border border-slate-700">
+                        FIFO Waiting Room System
+                    </span>
+                </div>
+                <button onclick="closeSmartWaitingRoom()" class="text-slate-400 hover:text-white font-bold text-xs flex items-center space-x-1">
+                    <i class="fa-solid fa-xmark"></i>
+                    <span>Batal</span>
+                </button>
+            </div>
+
+            <!-- Waiting Room Content Area -->
+            <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
+                <div>
+                    <div class="text-center mb-5">
+                        <h2 class="text-2xl font-black tracking-tight text-white uppercase">SMART WAITING ROOM</h2>
+                        <p class="text-xs text-slate-400 mt-0.5">Alur Antrean Presisi Berbasis Milidetik</p>
+                    </div>
+
+                    <!-- STEP BREADCRUMB INDICATOR -->
+                    <div class="grid grid-cols-4 gap-1.5 mb-6 text-center font-mono text-[10px]">
+                        <div id="step1Indicator" class="bg-emerald-900/40 text-emerald-400 border border-emerald-500/50 rounded-lg py-1.5 font-bold">1. BEFORE</div>
+                        <div id="step2Indicator" class="bg-amber-900/40 text-amber-400 border border-amber-500/50 rounded-lg py-1.5 font-bold">2. 10:00 AM</div>
+                        <div id="step3Indicator" class="bg-slate-800/60 text-slate-500 border border-slate-700/50 rounded-lg py-1.5 font-bold">3. QUEUE</div>
+                        <div id="step4Indicator" class="bg-slate-800/60 text-slate-500 border border-slate-700/50 rounded-lg py-1.5 font-bold">4. FORM</div>
+                    </div>
+
+                    <!-- STEP CONTENT PANELS -->
+
+                    <!-- STEP 1 & 2 VIEW: READY TO JOIN -->
+                    <div id="panelJoinQueue" class="border border-amber-500/30 rounded-3xl p-5 bg-slate-900/80 backdrop-blur text-center space-y-4 relative overflow-hidden">
+                        <div class="text-xs font-mono text-emerald-400 font-bold uppercase tracking-widest">
+                            10:00 AM NOW
+                        </div>
+                        <h3 class="text-3xl font-black text-white tracking-tight uppercase">JOIN QUEUE</h3>
+                        <p class="text-xs text-slate-300 leading-relaxed px-2">
+                            Pendaftaran telah dibuka! Klik tombol di bawah untuk mengambil nomor antrean presisi.
+                        </p>
+
+                        <button onclick="startQueueingProcess()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs py-4 px-4 rounded-xl shadow-lg transition transform active:scale-95 flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-bolt text-sm"></i>
+                            <span class="tracking-wide uppercase">[ AMBIL ANTREAN MAKAN SIANG ]</span>
+                        </button>
+
+                        <!-- SIMULATION MODE TOGGLES (FOR DEMO/TESTING) -->
+                        <div class="pt-3 border-t border-slate-800/80">
+                            <span class="text-[10px] font-mono text-slate-400 block mb-2">⚙️ Mode Simulasi Hasil Antrean (Uji Coba):</span>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button onclick="setSimMode('success')" id="btnSimSuccess" class="bg-emerald-950/80 text-emerald-400 border border-emerald-500/60 text-[11px] font-bold py-2 px-2 rounded-xl flex items-center justify-center space-x-1">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <span>Dapat Kuota (#842)</span>
+                                </button>
+                                <button onclick="setSimMode('soldout')" id="btnSimSoldout" class="bg-slate-800/80 text-slate-400 border border-slate-700/60 text-[11px] font-bold py-2 px-2 rounded-xl flex items-center justify-center space-x-1">
+                                    <i class="fa-solid fa-circle-xmark"></i>
+                                    <span>Kuota Habis (#1842)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3 VIEW: QUEUE PROCESSING -->
+                    <div id="panelProcessing" class="border border-indigo-500/40 rounded-3xl p-5 bg-slate-900/90 text-center space-y-5 hidden">
+                        <div class="text-[11px] font-mono text-slate-400 font-bold uppercase tracking-widest">
+                            QUEUE NUMBER
+                        </div>
+                        <div class="text-6xl font-black text-amber-400 font-mono tracking-tight" id="queueNumDisplay">
+                            #842
+                        </div>
+
+                        <div class="inline-block bg-indigo-950/90 text-indigo-300 border border-indigo-500/40 text-xs font-mono px-3 py-1 rounded-full">
+                            <span id="aheadCount">91</span> ahead in server memory
+                        </div>
+
+                        <!-- Timestamp Milidetik Progress Bar -->
+                        <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 space-y-2">
+                            <div class="flex justify-between text-[11px] font-mono">
+                                <span class="text-slate-400">Timestamp Milidetik:</span>
+                                <span id="timestampMs" class="text-amber-400 font-bold">1790524300926 ms</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div id="queueProgressBar" class="bg-gradient-to-r from-emerald-400 to-indigo-500 h-full w-1/3 transition-all duration-300"></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-amber-950/40 text-amber-300 border border-amber-500/30 p-3 rounded-xl text-xs font-mono flex items-center justify-center space-x-2 animate-pulse">
+                            <i class="fa-solid fa-rotate"></i>
+                            <span id="statusProcessingText">⚡ GET THE SLOT → Memverifikasi alokasi kuota porsi #842...</span>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4 VIEW: PICKUP LOCATION SELECTION -->
+                    <div id="panelLocation" class="bg-slate-900 rounded-3xl p-4 border border-indigo-500/30 space-y-4 hidden">
+                        <div>
+                            <span class="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider block">LANGKAH 2 DARI 2</span>
+                            <h3 class="text-xl font-black text-white uppercase">PICKUP LOCATION</h3>
+                            <p class="text-xs text-slate-400">Choose where you want to pick up your meal.</p>
+                        </div>
+
+                        <!-- Map Area Sketch -->
+                        <div class="bg-slate-800 rounded-2xl p-4 border border-slate-700/80 relative h-32 flex items-center justify-center overflow-hidden">
+                            <span class="absolute top-2 left-2 bg-slate-900 text-slate-400 text-[9px] font-mono px-2 py-0.5 rounded border border-slate-700">[ MAP AREA ]</span>
+                            
+                            <!-- Map Pin Visual Nodes -->
+                            <div class="flex justify-around w-full items-center z-10">
+                                <div onclick="selectLocation('A')" class="flex flex-col items-center cursor-pointer group">
+                                    <span class="text-[10px] font-bold text-white bg-indigo-600 px-2 py-0.5 rounded shadow mb-1">Point A</span>
+                                    <i class="fa-solid fa-location-dot text-indigo-400 text-xl group-hover:scale-125 transition"></i>
+                                </div>
+                                <div onclick="selectLocation('B')" class="flex flex-col items-center cursor-pointer group">
+                                    <span class="text-[10px] font-bold text-white bg-slate-700 px-2 py-0.5 rounded shadow mb-1">Point B</span>
+                                    <i class="fa-solid fa-location-dot text-slate-400 text-xl group-hover:scale-125 transition"></i>
+                                </div>
+                                <div onclick="selectLocation('C')" class="flex flex-col items-center cursor-pointer group">
+                                    <span class="text-[10px] font-bold text-white bg-slate-700 px-2 py-0.5 rounded shadow mb-1">Point C</span>
+                                    <i class="fa-solid fa-location-dot text-slate-400 text-xl group-hover:scale-125 transition"></i>
+                                </div>
+                            </div>
+
+                            <!-- Grid Lines Background -->
+                            <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:12px_12px]"></div>
+                        </div>
+
+                        <!-- Location Options Radio Cards -->
+                        <div class="space-y-2">
+                            <!-- Location A Card -->
+                            <label id="cardLocA" onclick="selectLocation('A')" class="block p-3 rounded-2xl bg-indigo-950/80 border-2 border-indigo-500 cursor-pointer transition flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <input type="radio" name="pickupLoc" value="A" checked class="accent-indigo-500 w-4 h-4">
+                                    <div>
+                                        <h4 class="text-xs font-bold text-white uppercase">LOCATION A</h4>
+                                        <p class="text-[11px] text-slate-300">Gedung Fakultas A (Undip)</p>
+                                        <p class="text-[10px] font-mono text-slate-400">12:00 – 13:00 WIB</p>
+                                    </div>
+                                </div>
+                                <span class="bg-emerald-900/80 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Tersedia</span>
+                            </label>
+
+                            <!-- Location B Card -->
+                            <label id="cardLocB" onclick="selectLocation('B')" class="block p-3 rounded-2xl bg-slate-800/80 border border-slate-700 cursor-pointer transition flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <input type="radio" name="pickupLoc" value="B" class="accent-indigo-500 w-4 h-4">
+                                    <div>
+                                        <h4 class="text-xs font-bold text-white uppercase">LOCATION B</h4>
+                                        <p class="text-[11px] text-slate-300">Gedung Fakultas B (Undip)</p>
+                                        <p class="text-[10px] font-mono text-slate-400">12:00 – 13:00 WIB</p>
+                                    </div>
+                                </div>
+                                <span class="bg-emerald-900/80 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Tersedia</span>
+                            </label>
+
+                            <!-- Location C Card -->
+                            <label id="cardLocC" onclick="selectLocation('C')" class="block p-3 rounded-2xl bg-slate-800/80 border border-slate-700 cursor-pointer transition flex items-center justify-between">
+                                <div class="flex items-center space-x-3">
+                                    <input type="radio" name="pickupLoc" value="C" class="accent-indigo-500 w-4 h-4">
+                                    <div>
+                                        <h4 class="text-xs font-bold text-white uppercase">LOCATION C</h4>
+                                        <p class="text-[11px] text-slate-300">Gedung Fakultas C (Undip)</p>
+                                        <p class="text-[10px] font-mono text-slate-400">12:00 – 13:00 WIB</p>
+                                    </div>
+                                </div>
+                                <span class="bg-emerald-900/80 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold px-2.5 py-0.5 rounded-full">Tersedia</span>
+                            </label>
+                        </div>
+
+                        <button onclick="confirmLocationAndFinish()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-xs py-3.5 rounded-xl shadow-lg transition">
+                            [ CONFIRM LOCATION ]
+                        </button>
+                    </div>
+
+                    <!-- SUCCESS REGISTRATION VIEW PASS -->
+                    <div id="panelSuccess" class="space-y-4 text-center hidden">
+                        <div class="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-2xl border border-emerald-500/40">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-black text-white uppercase tracking-tight">REGISTRATION SUCCESSFUL!</h3>
+                            <p class="text-xs text-slate-300">Kupon Makan Siang Berhasil Dialokasikan</p>
+                        </div>
+
+                        <!-- E-Voucher Pass Card -->
+                        <div class="bg-white text-slate-900 rounded-3xl overflow-hidden shadow-2xl text-left border border-slate-200">
+                            <!-- Voucher Header -->
+                            <div class="bg-indigo-900 text-white p-4 text-center space-y-1">
+                                <span class="text-[10px] font-mono uppercase tracking-widest text-amber-300 block">FOODTRUCK UNDIP PASS</span>
+                                <h4 class="text-base font-black tracking-wide uppercase">KUPON MAKAN GRATIS</h4>
+                                <div class="inline-block bg-slate-950/80 text-emerald-400 font-mono text-xs font-bold px-3 py-1 rounded-full border border-emerald-500/30">
+                                    NO. ANTREAN: <span id="finalPassNumber">#0142</span>
+                                </div>
+                            </div>
+
+                            <!-- QR Code Block -->
+                            <div class="p-5 text-center bg-slate-50 space-y-2 border-b border-dashed border-slate-300">
+                                <div class="w-40 h-40 mx-auto bg-white p-2 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-center">
+                                    <svg class="w-full h-full" viewBox="0 0 100 100" fill="none">
+                                        <path d="M0 0h30v30H0zM10 10h10v10H10zM70 0h30v30H70zM80 10h10v10H80zM0 70h30v30H0zM10 80h10v10H10z" fill="#0f172a"/>
+                                        <path d="M40 10h10v20H40zM10 40h20v10H10zM50 40h10v20H50zM70 50h20v10H70zM40 70h10v20H40zM70 80h20v10H70z" fill="#0f172a"/>
+                                    </svg>
+                                </div>
+                                <span class="text-[10px] font-mono text-slate-400 block">Scan di lokasi saat pengambilan</span>
+                            </div>
+
+                            <!-- Pass Details -->
+                            <div class="p-4 space-y-2 text-xs font-medium text-slate-600">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">Mahasiswa:</span>
+                                    <span class="font-bold text-slate-800">Ahmad Rifai (220101928)</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">Lokasi Ambil:</span>
+                                    <span id="finalSelectedLoc" class="font-bold text-indigo-700">LOCATION A (Gedung Fakultas A)</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-400">Waktu Ambil:</span>
+                                    <span class="font-bold text-slate-800 font-mono">12:00 – 13:00 WIB</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button onclick="closeSmartWaitingRoom()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-3.5 rounded-xl transition">
+                            Kembali ke Beranda
+                        </button>
+                    </div>
+
+                    <!-- SOLD OUT / MAAF KUOTA HABIS VIEW -->
+                    <div id="panelSoldOut" class="border border-rose-500/40 rounded-3xl p-5 bg-slate-900/90 text-center space-y-4 hidden">
+                        <div class="w-12 h-12 rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto text-xl border border-rose-500/40">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] font-mono text-rose-400 font-bold uppercase tracking-wider block">STATUS: KUOTA HABIS</span>
+                            <h3 class="text-xl font-black text-white uppercase tracking-tight">MAAF, KUOTA HARI INI TELAH HABIS</h3>
+                        </div>
+
+                        <div class="bg-rose-950/40 border border-rose-500/30 rounded-2xl p-4 text-center space-y-1">
+                            <span class="text-xs font-mono text-slate-400 block">Nomor Antrean Anda:</span>
+                            <span class="text-4xl font-black font-mono text-rose-400">#1842</span>
+                            <span class="text-xs text-rose-300 font-semibold block pt-1">Melebihi Batas 1.800 Porsi Gratis</span>
+                        </div>
+
+                        <p class="text-xs text-slate-300 leading-relaxed">
+                            Pendaftaran telah ditutup otomatis karena seluruh <strong class="text-amber-400">1.800 porsi makan siang</strong> hari ini sudah teralokasi penuh untuk pendaftar dengan timestamp lebih awal.
+                        </p>
+
+                        <!-- System Stats Box -->
+                        <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 text-left space-y-1.5 font-mono text-[11px]">
+                            <div class="flex justify-between text-slate-400">
+                                <span>Total Kuota Kampus:</span>
+                                <span class="text-white font-bold">1.800 / 1.800 (100%)</span>
+                            </div>
+                            <div class="flex justify-between text-slate-400">
+                                <span>Waktu Kuota Habis:</span>
+                                <span class="text-amber-400 font-bold">10:00:12.482 WIB</span>
+                            </div>
+                            <div class="flex justify-between text-slate-400">
+                                <span>Status Pendaftaran:</span>
+                                <span class="text-rose-400 font-bold">Tidak Mendapat Kuota</span>
+                            </div>
+                        </div>
+
+                        <button onclick="closeSmartWaitingRoom()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs py-3.5 rounded-xl transition">
+                            Kembali ke Beranda
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Footer Footnote inside Waiting Room -->
+                <div class="text-center text-[10px] font-mono text-slate-500 pt-3">
+                    First In - First Out (FIFO) Engine • Zero Captcha • Isolated Domain
+                </div>
+            </div>
+        </div>
+
+        <!-- NOTIFICATION MODAL -->
+        <div id="notificationModal" class="absolute inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4 hidden">
+            <div class="bg-white w-full max-w-sm rounded-3xl p-4 space-y-3 shadow-2xl border border-slate-200">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                    <h3 class="font-extrabold text-slate-800 text-sm">Notifikasi Pendaftaran</h3>
+                    <button onclick="toggleNotificationModal()" class="text-slate-400 hover:text-slate-600 text-xs">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="space-y-2">
+                    <div class="p-2.5 bg-indigo-50 border border-indigo-100 rounded-xl text-xs space-y-1">
+                        <span class="font-bold text-indigo-900 block">📢 Pendaftaran War Pass Segera Dibuka</span>
+                        <p class="text-indigo-700 text-[11px]">Siapkan diri Anda pukul 10:00 WIB. Pastikan koneksi stabil.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Global State Management
+        let selectedRating = 0;
+        let selectedTags = [];
+        let simulationMode = 'success'; // 'success' or 'soldout'
+        let selectedPickupLoc = 'A';
+
+        // Countdown Timer Logic Simulation
+        function updateCountdown() {
+            const secElem = document.getElementById('seconds');
+            if (secElem) {
+                let currentSec = parseInt(secElem.innerText);
+                if (currentSec > 0) {
+                    currentSec--;
+                } else {
+                    currentSec = 59;
+                }
+                secElem.innerText = currentSec < 10 ? '0' + currentSec : currentSec;
+            }
+        }
+        setInterval(updateCountdown, 1000);
+
+        // Tab Switching Logic
+        function switchTab(tabName) {
+            document.getElementById('tabHome').classList.add('hidden');
+            document.getElementById('tabHistory').classList.add('hidden');
+            document.getElementById('tabProfile').classList.add('hidden');
+
+            document.getElementById('navHome').className = "flex flex-col items-center justify-center w-1/3 py-1 text-slate-400 hover:text-indigo-600 font-bold transition";
+            document.getElementById('navHistory').className = "flex flex-col items-center justify-center w-1/3 py-1 text-slate-400 hover:text-indigo-600 font-bold transition";
+            document.getElementById('navProfile').className = "flex flex-col items-center justify-center w-1/3 py-1 text-slate-400 hover:text-indigo-600 font-bold transition";
+
+            if (tabName === 'home') {
+                document.getElementById('tabHome').classList.remove('hidden');
+                document.getElementById('navHome').className = "flex flex-col items-center justify-center w-1/3 py-1 text-indigo-600 font-bold transition";
+            } else if (tabName === 'history') {
+                document.getElementById('tabHistory').classList.remove('hidden');
+                document.getElementById('navHistory').className = "flex flex-col items-center justify-center w-1/3 py-1 text-indigo-600 font-bold transition";
+            } else if (tabName === 'profile') {
+                document.getElementById('tabProfile').classList.remove('hidden');
+                document.getElementById('navProfile').className = "flex flex-col items-center justify-center w-1/3 py-1 text-indigo-600 font-bold transition";
+            }
+        }
+
+        // Rating Star Form Logic
+        function setRating(rating) {
+            selectedRating = rating;
+            const starBtns = document.querySelectorAll('.star-btn');
+            const ratingLabel = document.getElementById('ratingLabel');
+            
+            const labels = ["", "Sangat Kecewa 😞", "Kurang 😐", "Cukup Cepat 🙂", "Sangat Puas 😁", "Luar Biasa! 🔥"];
+            ratingLabel.innerText = labels[rating] || "";
+
+            starBtns.forEach((btn, index) => {
+                if (index < rating) {
+                    btn.className = "star-btn text-2xl text-amber-400 transition transform scale-110";
+                } else {
+                    btn.className = "star-btn text-2xl text-slate-300 hover:text-amber-400 transition transform";
+                }
+            });
+        }
+
+        function toggleTag(btn) {
+            btn.classList.toggle('bg-indigo-600');
+            btn.classList.toggle('text-white');
+            btn.classList.toggle('bg-white');
+            btn.classList.toggle('text-slate-600');
+        }
+
+        function submitReview(event) {
+            event.preventDefault();
+            const comment = document.getElementById('reviewComment').value;
+            if (selectedRating === 0) {
+                alert("Silakan pilih rating bintang terlebih dahulu.");
+                return;
+            }
+
+            // Create New Review Element
+            const reviewsList = document.getElementById('reviewsList');
+            const newReviewCard = document.createElement('div');
+            newReviewCard.className = "bg-indigo-50/80 rounded-2xl p-3 border border-indigo-200/80 space-y-1.5 transition-all duration-500 animate-fadeIn";
+            
+            let starsHtml = '';
+            for(let i=1; i<=5; i++) {
+                starsHtml += i <= selectedRating ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-regular fa-star text-slate-300"></i>';
+            }
+
+            newReviewCard.innerHTML = `
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-6 h-6 rounded-full bg-indigo-900 text-white font-bold text-[10px] flex items-center justify-center">
+                            AR
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold text-slate-800">Ahmad Rifai (Anda)</span>
+                            <span class="text-[10px] text-indigo-600 font-mono ml-1">Baru Saja</span>
+                        </div>
+                    </div>
+                    <div class="flex text-amber-400 text-[11px]">
+                        ${starsHtml}
+                    </div>
+                </div>
+                <p class="text-xs text-slate-700 font-medium leading-snug">${comment}</p>
+                <div class="flex items-center space-x-2 pt-0.5">
+                    <span class="bg-indigo-200 text-indigo-900 text-[9px] font-bold px-2 py-0.5 rounded-md">Ulasan Terverifikasi</span>
+                </div>
+            `;
+
+            reviewsList.insertBefore(newReviewCard, reviewsList.children[1]);
+
+            // Reset Form
+            document.getElementById('reviewComment').value = '';
+            setRating(0);
+            document.getElementById('ratingLabel').innerText = "Pilih rating";
+            alert("Terima kasih! Ulasan, kritik, dan saran Anda telah tersampaikan ke tim FoodTruck Undip.");
+        }
+
+        // Smart Waiting Room Handlers
+        function openSmartWaitingRoom() {
+            document.getElementById('smartWaitingRoomModal').classList.remove('hidden');
+            resetWaitingRoomView();
+        }
+
+        function closeSmartWaitingRoom() {
+            document.getElementById('smartWaitingRoomModal').classList.add('hidden');
+        }
+
+        function setSimMode(mode) {
+            simulationMode = mode;
+            const btnSucc = document.getElementById('btnSimSuccess');
+            const btnSold = document.getElementById('btnSimSoldout');
+
+            if (mode === 'success') {
+                btnSucc.className = "bg-emerald-950/80 text-emerald-400 border border-emerald-500/60 text-[11px] font-bold py-2 px-2 rounded-xl flex items-center justify-center space-x-1";
+                btnSold.className = "bg-slate-800/80 text-slate-400 border border-slate-700/60 text-[11px] font-bold py-2 px-2 rounded-xl flex items-center justify-center space-x-1";
+            } else {
+                btnSold.className = "bg-rose-950/80 text-rose-400 border border-rose-500/60 text-[11px] font-bold py-2 px-2 rounded-xl flex items-center justify-center space-x-1";
+                btnSucc.className = "bg-slate-800/80 text-slate-400 border border-slate-700/60 text-[11px] font-bold py-2 px-2 rounded-xl flex items-center justify-center space-x-1";
+            }
+        }
+
+        function resetWaitingRoomView() {
+            document.getElementById('panelJoinQueue').classList.remove('hidden');
+            document.getElementById('panelProcessing').classList.add('hidden');
+            document.getElementById('panelLocation').classList.add('hidden');
+            document.getElementById('panelSuccess').classList.add('hidden');
+            document.getElementById('panelSoldOut').classList.add('hidden');
+
+            setStepIndicator(1);
+        }
+
+        function setStepIndicator(step) {
+            const s1 = document.getElementById('step1Indicator');
+            const s2 = document.getElementById('step2Indicator');
+            const s3 = document.getElementById('step3Indicator');
+            const s4 = document.getElementById('step4Indicator');
+
+            const inactive = "bg-slate-800/60 text-slate-500 border border-slate-700/50 rounded-lg py-1.5 font-bold";
+            const active = "bg-emerald-900/40 text-emerald-400 border border-emerald-500/50 rounded-lg py-1.5 font-bold";
+
+            s1.className = step >= 1 ? active : inactive;
+            s2.className = step >= 2 ? active : inactive;
+            s3.className = step >= 3 ? active : inactive;
+            s4.className = step >= 4 ? active : inactive;
+        }
+
+        function startQueueingProcess() {
+            document.getElementById('panelJoinQueue').classList.add('hidden');
+            document.getElementById('panelProcessing').classList.remove('hidden');
+            setStepIndicator(3);
+
+            if (simulationMode === 'success') {
+                document.getElementById('queueNumDisplay').innerText = "#842";
+                document.getElementById('aheadCount').innerText = "91";
+                
+                // Simulate processing delay
+                setTimeout(() => {
+                    document.getElementById('panelProcessing').classList.add('hidden');
+                    document.getElementById('panelLocation').classList.remove('hidden');
+                    setStepIndicator(4);
+                }, 2200);
+            } else {
+                document.getElementById('queueNumDisplay').innerText = "#1842";
+                document.getElementById('aheadCount').innerText = "1841";
+
+                setTimeout(() => {
+                    document.getElementById('panelProcessing').classList.add('hidden');
+                    document.getElementById('panelSoldOut').classList.remove('hidden');
+                }, 2200);
+            }
+        }
+
+        function selectLocation(loc) {
+            selectedPickupLoc = loc;
+            const cA = document.getElementById('cardLocA');
+            const cB = document.getElementById('cardLocB');
+            const cC = document.getElementById('cardLocC');
+
+            cA.className = loc === 'A' ? "block p-3 rounded-2xl bg-indigo-950/80 border-2 border-indigo-500 cursor-pointer transition flex items-center justify-between" : "block p-3 rounded-2xl bg-slate-800/80 border border-slate-700 cursor-pointer transition flex items-center justify-between";
+            cB.className = loc === 'B' ? "block p-3 rounded-2xl bg-indigo-950/80 border-2 border-indigo-500 cursor-pointer transition flex items-center justify-between" : "block p-3 rounded-2xl bg-slate-800/80 border border-slate-700 cursor-pointer transition flex items-center justify-between";
+            cC.className = loc === 'C' ? "block p-3 rounded-2xl bg-indigo-950/80 border-2 border-indigo-500 cursor-pointer transition flex items-center justify-between" : "block p-3 rounded-2xl bg-slate-800/80 border border-slate-700 cursor-pointer transition flex items-center justify-between";
+        }
+
+        function confirmLocationAndFinish() {
+            document.getElementById('panelLocation').classList.add('hidden');
+            document.getElementById('panelSuccess').classList.remove('hidden');
+            
+            const locNames = {
+                'A': 'LOCATION A (Gedung Fakultas A)',
+                'B': 'LOCATION B (Gedung Fakultas B)',
+                'C': 'LOCATION C (Gedung Fakultas C)'
+            };
+
+            document.getElementById('finalSelectedLoc').innerText = locNames[selectedPickupLoc];
+        }
+
+        function toggleNotificationModal() {
+            const notifModal = document.getElementById('notificationModal');
+            notifModal.classList.toggle('hidden');
+        }
+
+        function showCouponModal() {
+            openSmartWaitingRoom();
+            document.getElementById('panelJoinQueue').classList.add('hidden');
+            document.getElementById('panelSuccess').classList.remove('hidden');
+            setStepIndicator(4);
+        }
+    </script>
+</body>
+</html>
